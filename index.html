@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js"></script>
+  <title>ECharts</title>
+</head>
+
+<body>
+  <div class="page">
+    <div class="container"></div>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    console.log(data);
+    const valuesInCP = data.filter((elem) => elem.name === "В программе ЦП").map((elem) => elem.value);
+    const valuesOutCP = data.filter((elem) => elem.name === "Вне программ ЦП").map((elem) => elem.value);
+    const valuesInIT = data.filter((elem) => elem.name === "В программе ИТ").map((elem) => elem.value);
+    const valuesOutIT = data.filter((elem) => elem.name === "Вне программ ИТ").map((elem) => elem.value);
+
+    const genFormatter = (series) => {
+      return (param) => {
+        console.log(param);
+        let sum = 0;
+        series.forEach(item => {
+          sum += item.data[param.dataIndex];
+        });
+        return sum
+      }
+    }
+
+    const inSeries = [
+      {
+        name: "В программе ЦП",
+        type: "bar",
+        data: valuesInCP,
+        stack: "in",
+
+      },
+      {
+        name: "В программе ИТ",
+        type: "bar",
+        data: valuesInIT,
+        stack: "in",
+      },
+
+    ];
+
+    const outSeries = [
+      {
+        name: "Вне программ ЦП",
+        type: "bar",
+        data: valuesOutCP,
+        stack: "out",
+
+      },
+      {
+        name: "Вне программ ИТ",
+        type: "bar",
+        data: valuesOutIT,
+        stack: "out",
+
+      },
+    ];
+
+    const chart = echarts.init(document.querySelector(".container"));
+    const options = {
+      title: {
+        text: "Проекты в программах и вне программ",
+        textStyle: {
+          fontSize: 16,
+        },
+        subtext: "Сумма и процентное соотношение проектов, находящихся в программах и вне программ",
+        subtextStyle: {
+          fontSize: 14,
+        },
+      },
+      color: [
+        "#56B9F2",
+        "#0078D2",
+        "#22C38E",
+        "#00724C",
+      ],
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow',
+          label: {
+            //расчет процентного соотношения проектов в каждом месяце
+            formatter: (param) => {
+              return `${param.value} 2022, в программе - ${Math.round((param.seriesData[0].value + param.seriesData[1].value) / param.seriesData.reduce((prev, current) => {
+                return prev + current.value
+              }, 0) * 100)}%, вне программы - ${Math.round((param.seriesData[2].value + param.seriesData[3].value) / param.seriesData.reduce((prev, current) => {
+                return prev + current.value
+              }, 0) * 100)}%`
+            }
+          },
+        },
+      },
+      legend: {
+        data: [
+          "В программе ИТ",
+          "В программе ЦП",
+          "Вне программ ИТ",
+          "Вне программ ЦП",
+        ],
+        bottom: 16,
+      },
+      xAxis: {
+        data: ["Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь"],
+      },
+      yAxis: {},
+      series: [...inSeries.map((item, index) => Object.assign(item, {
+        type: 'bar',
+        label: {
+          show: index === 1,
+          formatter: genFormatter(inSeries),
+          fontSize: 14,
+          fontWeight: 600,
+          color: 'black',
+          position: 'top'
+        },
+      })),
+      ...outSeries.map((item, index) => Object.assign(item, {
+        type: 'bar',
+        label: {
+          show: index === 1,
+          formatter: genFormatter(outSeries),
+          fontSize: 14,
+          fontWeight: 600,
+          color: 'black',
+          position: 'top'
+        },
+      }))
+      ]
+    };
+
+    chart.setOption(options);
+  </script>
+</body>
+
+</html>
