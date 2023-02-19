@@ -1,3 +1,5 @@
+# gazprom-test
+
 Ипользуя библиотеку echarts и данныее из файла data.js построить визуализацию согласно макету из figma.
 
 Ссылка на документацию https://echarts.apache.org/en/index.html
